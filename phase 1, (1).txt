@@ -1,0 +1,157 @@
+#include <GL/glut.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+
+int phyWidth = 700;
+int phyHeight = 700;
+int logWidth = 100;
+int logHeight = 100;
+int status = 0;
+int mouseXX, mouseYY;
+int sqWid = 8;
+int cx1 = 50, cy1 = 30, cx2 = 50, cy2 = 50, cx3 = 50, cy3 = 70;
+int menu = 1;
+
+void Timer(int value) {
+    glutTimerFunc(80, Timer, value);
+    glutPostRedisplay();
+}
+
+void printSome(const char* string, int x, int y) {
+    glRasterPos2d(x, y);
+    for (int i = 0; i < strlen(string); i++)
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string[i]);
+    glFlush();
+}
+
+
+void drawSquares() {
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glBegin(GL_POLYGON);
+    glVertex2f(cx1 - sqWid / 2 - 7, cy1 - sqWid / 2);
+    glVertex2f(cx1 + sqWid / 2 + 7, cy1 - sqWid / 2);
+    glVertex2f(cx1 + sqWid / 2 + 7, cy1 + sqWid / 2);
+    glVertex2f(cx1 - sqWid / 2 - 7, cy1 + sqWid / 2);
+    glEnd();
+
+    glColor3f(1.0f, 1.0f, 1.0f); //
+    glBegin(GL_POLYGON);
+    glVertex2f(cx2 - sqWid / 2 - 7, cy2 - sqWid / 2);
+    glVertex2f(cx2 + sqWid / 2 + 7, cy2 - sqWid / 2);
+    glVertex2f(cx2 + sqWid / 2 + 7, cy2 + sqWid / 2);
+    glVertex2f(cx2 - sqWid / 2 - 7, cy2 + sqWid / 2);
+    glEnd();
+
+    glColor3f(1.0f, 1.0f, 1.0f); //
+    glBegin(GL_POLYGON);
+    glVertex2f(cx3 - sqWid / 2 - 7, cy3 - sqWid / 2);
+    glVertex2f(cx3 + sqWid / 2 + 7, cy3 - sqWid / 2);
+    glVertex2f(cx3 + sqWid / 2 + 7, cy3 + sqWid / 2);
+    glVertex2f(cx3 - sqWid / 2 - 7, cy3 + sqWid / 2);
+    glEnd();
+}
+
+void mouseClick(int btn, int state, int x, int y)
+{
+    if (menu == 1) {
+        if (btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+            mouseXX = x;
+            mouseXX = 0.5 + 1.0 * mouseXX * logWidth / phyWidth;
+            mouseYY = phyHeight - y;
+            mouseYY = 0.5 + 1.0 * mouseYY * logHeight / phyHeight;
+            if (mouseXX >= (cx1 - sqWid / 2) && mouseXX <= (cx1 + sqWid / 2) && mouseYY >= (cy1 - sqWid / 2) && mouseYY <= (cy1 + sqWid / 2)) {
+                status = 1;
+                menu = 0;
+            }
+            if (mouseXX >= (cx2 - sqWid / 2) && mouseXX <= (cx2 + sqWid / 2) && mouseYY >= (cy2 - sqWid / 2) && mouseYY <= (cy2 + sqWid / 2)) {
+                status = 2;
+                menu = 0;
+            }
+            if (mouseXX >= (cx3 - sqWid / 2) && mouseXX <= (cx3 + sqWid / 2) && mouseYY >= (cy3 - sqWid / 2) && mouseYY <= (cy3 + sqWid / 2)) {
+                status = 3;
+                menu = 0;
+            }
+        }
+    }
+    if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+        status = 0;
+        menu = 0;
+    }
+    glutPostRedisplay();
+}
+
+static void display(void)
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    if (status == 0) {
+        menu = 1;
+        glColor3f(0.0f, 1.0f, 0.0f);
+        printSome("Ma+h Hero", 44, 90);
+        drawSquares();
+        glColor3f(0.0f, 0.0f, 0.0f);
+        printSome("PLAY", 47, 69);
+        printSome("HIGHSCORES", 41, 49);
+        printSome("QUIT", 47, 29);
+    }
+    else if (status == 1) {
+        menu = 0;
+        glColor3f(1.0f, 0.0f, 1.0f);
+        glBegin(GL_LINES);
+        glVertex2f(0, 0);
+        glVertex2f(100, 100);
+        glEnd();
+    }
+    else if (status == 2) {
+        menu = 0;
+        glColor3f(1.0f, 1.0f, 1.0f);
+        glBegin(GL_QUADS);
+        glVertex2f(0, 0);
+        glVertex2f(0, 50);
+        glVertex2f(50, 50);
+        glVertex2f(50, 0);
+        glEnd();
+    }
+    else if (status == 3) {
+        glColor3f(1.0f, 0.0f, 1.0f);
+        glBegin(GL_TRIANGLES);
+        glVertex2f(0, 0);
+        glVertex2f(50, 100);
+        glVertex2f(100, 0);
+        glEnd();
+    }
+
+    glutSwapBuffers();
+    glFlush();
+}
+
+void init2D() {
+    glClearColor(0, 0, 0, 1);
+    glMatrixMode(GL_PROJECTION);
+    gluOrtho2D(0, logWidth, 0, logHeight);
+}
+int main(int argc, char* argv[])
+{
+    glutInit(&argc, argv);
+    glutInitWindowSize(phyWidth, phyHeight);
+    glutInitWindowPosition(10, 10);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutCreateWindow("Mouse");
+    init2D();
+    glutDisplayFunc(display);
+    glutMouseFunc(mouseClick);
+    Timer(0);
+    glutMainLoop();
+}
+
+void output(int x, int y, const char* string) {
+    glColor3f(1.0, 0.0, 0.0);
+    glRasterPos2f(x, y);
+    int len, i;
+    len = (int)strlen(string);
+    for (i = 0; i < len; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, string[i]);
+    }
+}
